@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using NearbyShop.API.Data;
+using NearbyShop.API.Repositories;
+using NearbyShop.API.ViewModels;
 
 namespace NearbyShop.API
 {
@@ -25,7 +24,37 @@ namespace NearbyShop.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.AddDbContextPool<ApplicationDbContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("NearbyShopDb")));
+
+            services.AddScoped<IShopRepository, ShopRepository>();
+
+            var mappingConfig = new MapperConfiguration(mc =>
+                {
+                    mc.AddProfile(new MapperProfile());
+                });
+
+            IMapper mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
+
+            services.AddDefaultIdentity<User>();
+
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireDigit = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = 8;
+            }
+            );
+
+            services.AddCors();
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -41,8 +70,17 @@ namespace NearbyShop.API
                 app.UseHsts();
             }
 
+            app.UseAuthentication();
+
             app.UseHttpsRedirection();
             app.UseMvc();
+        }
+
+        private class MappingProfile : Profile
+        {
+            public MappingProfile()
+            {
+            }
         }
     }
 }
