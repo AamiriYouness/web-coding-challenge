@@ -8,6 +8,8 @@ namespace NearbyShop.API.ViewModels
         {
             CreateMap<Shop, ShopViewModel>()
                 .ReverseMap();
+            CreateMap<User, RegisterViewModel>()
+                .ReverseMap();
         }
     }
 }

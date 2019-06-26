@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using NearbyShop.API.Entities;
 
 namespace NearbyShop.API.Data
 {
@@ -11,7 +12,8 @@ namespace NearbyShop.API.Data
         }
 
         public DbSet<Shop> Shops { get; set; }
-        public DbSet<User> Users { get; set; }
+        public new DbSet<User> Users { get; set; }
+        public DbSet<ShopUser> ShopUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -26,6 +28,10 @@ namespace NearbyShop.API.Data
                 new Shop { Id = 7, Name = "Shop Name 5", Distance = 43, ThumbnailUrl = thumbnailUrl },
                 new Shop { Id = 8, Name = "Shop Name 5", Distance = 2, ThumbnailUrl = thumbnailUrl }
                 );
+
+            builder.Entity<ShopUser>()
+                .HasKey(t => new { t.ShopId, t.UserId });
+
             base.OnModelCreating(builder);
         }
     }
